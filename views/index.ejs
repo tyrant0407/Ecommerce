@@ -2,19 +2,23 @@
 
 <main>
   <section class="flex products grid p-2 pt-4">
+    <% allProducts.forEach(product=>{ %>
     <div class="product  w-100 rounded-md overflow-hidden">
-      <div class="images 100%">
-        <img class="w-100 aspect-3/4 object-contain" src="https://images.pexels.com/photos/20723439/pexels-photo-20723439/free-photo-of-a-group-of-rams-laying-in-the-grass.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="">
+      <div class="images 100% flex overflow-x-auto" style="scroll-snap-type: x mandatory;">
+        <% product.image.forEach(imageSrc=>{ %>
+        <img style="scroll-snap-align: center;" class="w-100 aspect-3/4 object-contain" src="<%= imageSrc %>" alt="">
+        <% }) %>
       </div>
       <div class="text p-2 truncate">
-        <h1>deer</h1>
-        <p class="opacity-50 text-sm truncate">very good animal , very polite, just kick you when near</p>
+        <h1><%= product.name %></h1>
+        <p class="opacity-50 text-sm truncate"><%= product.description %></p>
       </div>
       <div class="flex flex-col justify-between p-2 pt-0 gap-2">
-        <span class="text-lg font-thin">₹ 100</span>
+        <span class="text-lg font-thin">₹ <%= product.price %></span>
         <button class="bg-slate-100 opacity-75 uppercase text-sm px-4 py-2 rounded">Add to cart</button>
       </div>
     </div>
+    <% }) %>
   </section>
 </main>
 
