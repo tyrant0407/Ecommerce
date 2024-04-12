@@ -20,7 +20,7 @@
 
 <main>
   <section class="p-3">
-    <form action="/createProduct">
+    <form action="/createProduct" method="post" enctype="multipart/form-data">
       <div class="form-group flex flex-col gap-2 mb-3">
         <label for="name">Name</label>
         <input class="form-control
@@ -91,6 +91,8 @@
           }
         }
       </script>
+
+      <button class="w-full p-2 px-4 bg-slate-500 rounded-md text-white">create product</button>
 
     </form>
 
