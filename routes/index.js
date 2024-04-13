@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 const userModel = require('./users')
 const productModel = require('./product')
+const cartModel = require('./cart')
+const cartProductModel = require('./cartProduct')
 
 var users = require('./users')
 var passport = require('passport')
@@ -59,9 +61,7 @@ router.get('/login', function (req, res) {
 })
 
 
-router.post(
-  '/login',
-  passport.authenticate('local', {
+router.post('/login',passport.authenticate('local',{
     failureRedirect: '/login',
   }),
   (req, res, next) => {
@@ -109,6 +109,42 @@ router.post('/createProduct', isloggedIn, isSeller, upload.array('image'), async
 
 router.get('/cart', (req, res, next) => {
   res.render('cart')
+})
+router.get('/addToCart/:productId',async (req, res, next) => {
+ const productId = req.params.productId;
+
+ let  userCart = await cartModel.findOne({
+  user:req.user._id
+ })
+
+ if(!userCart){
+  userCart = await cartModel.create({
+    user:req.user._id
+  })
+ }
+ let newCartProduct = await cartProductModel.findOne({
+  product:productId,  
+  _id:{$in:userCart.products}
+ })
+
+
+if(newCartProduct){
+ newCartProduct.quantity = newCartProduct.quantity + 1
+ await newCartProduct.save()
+}
+else{
+  newCartProduct = await cartProductModel.create({
+  product:productId,
+  quantity:1,
+})
+
+ userCart.products.push(newCartProduct._id)
+ await userCart.save()
+}
+
+
+res.redirect('back')
+
 })
 
 router.get('/profile', (req, res, next) => {

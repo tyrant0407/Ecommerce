@@ -1,0 +1,38 @@
+<% include ./partials/header.ejs %>
+
+<main>
+  <section class="p-4 px-6">
+    <div class="items flex flex-col gap-10">
+      <div class="item flex flex-col gap-1">
+        <div class="top flex gap-3">
+          <div class="left w-20 flex-shrink-0 ">
+            <img class="h-20 w-20 rounded-md aspect-square object-cover" src="https://images.pexels.com/photos/20723439/pexels-photo-20723439/free-photo-of-a-group-of-rams-laying-in-the-grass.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="">
+          </div>
+          <div class="right truncate">
+            <h1 class="truncate text-xl">Deers</h1>
+            <p class="truncate leading-none opacity-50">Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro, sed. Libero quam quidem eius exercitationem.</p>
+            <p class="text-light leading-loose mt-auto"> ₹11900 </p>
+          </div>
+        </div>
+        <div class="bottom flex gap-3 justify-end">
+          <label for="quantity_1" class="flex gap-3 w-fit p-2 rounded-md border bg-slate-50">
+            qty :
+            <input style="width: 4ch;" type="Number" class="bg-transparent outline-none border-none" id="quantity_1" value="1">
+          </label>
+
+          <button class="w-fit p-2 rounded-md border bg-slate-50/75 border-red-100">remove</button>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="sticky bottom-[5rem] p-3 px-6 bg-slate-100 flex justify-between items-center    " style="border-bottom: 1px solid #aaa;">
+  <h1 class="text-xl">
+    <small>Total :</small> ₹11900
+  </h1>
+  <button class="p-2 px-4 text-lg bg-slate-200 rounded-md">place order</button>
+</nav>
+
+<% include ./partials/footer.ejs %>
