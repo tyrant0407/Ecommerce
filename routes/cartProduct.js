@@ -9,4 +9,3 @@ const cartProductSchema = mongoose.Schema({
 })
 
 module.exports = mongoose.model('cartProduct', cartProductSchema)
-

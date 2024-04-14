@@ -13,9 +13,7 @@ const upload = require('./multer')
 
 /* GET home page. */
 router.get('/', isloggedIn, async function (req, res, next) {
-
   const allProducts = await productModel.find()
-
   res.render('index', { title: 'Express', allProducts });
 });
 
@@ -61,7 +59,9 @@ router.get('/login', function (req, res) {
 })
 
 
-router.post('/login',passport.authenticate('local',{
+router.post(
+  '/login',
+  passport.authenticate('local', {
     failureRedirect: '/login',
   }),
   (req, res, next) => {
@@ -107,48 +107,76 @@ router.post('/createProduct', isloggedIn, isSeller, upload.array('image'), async
 
 })
 
-router.get('/cart', (req, res, next) => {
-  res.render('cart')
-})
-router.get('/addToCart/:productId',async (req, res, next) => {
- const productId = req.params.productId;
-
- let  userCart = await cartModel.findOne({
-  user:req.user._id
- })
-
- if(!userCart){
-  userCart = await cartModel.create({
-    user:req.user._id
+router.get('/cart', isloggedIn, async (req, res, next) => {
+  const userCart = await cartModel.findOne({
+    user: req.user._id
+  }).populate('products').populate({
+    path: "products",
+    populate: 'product'
   })
- }
- let newCartProduct = await cartProductModel.findOne({
-  product:productId,  
-  _id:{$in:userCart.products}
- })
+
+  let totalPrice = 0
+
+  userCart.products.forEach(cartProduct => {
+    totalPrice += cartProduct.product.price * (cartProduct.quantity == 0 ? 1 : cartProduct.quantity)
+  })
 
 
-if(newCartProduct){
- newCartProduct.quantity = newCartProduct.quantity + 1
- await newCartProduct.save()
-}
-else{
-  newCartProduct = await cartProductModel.create({
-  product:productId,
-  quantity:1,
-})
 
- userCart.products.push(newCartProduct._id)
- await userCart.save()
-}
-
-
-res.redirect('back')
-
+  res.render('cart', { userCart, totalPrice })
 })
 
 router.get('/profile', (req, res, next) => {
   res.render('profile')
+})
+
+router.get('/addToCart/:productId', isloggedIn, async (req, res, next) => {
+  const productId = req.params.productId
+
+  let userCart = await cartModel.findOne({
+    user: req.user._id
+  })
+
+  if (!userCart) {
+    userCart = await cartModel.create({
+      user: req.user._id,
+    })
+  }
+
+
+  let newCartProduct = await cartProductModel.findOne({
+    product: productId,
+    _id: { $in: userCart.products }
+  })
+
+  if (newCartProduct) {
+    newCartProduct.quantity = newCartProduct.quantity + 1
+    await newCartProduct.save()
+  }
+  else {
+    newCartProduct = await cartProductModel.create({
+      product: productId,
+      quantity: 1
+    })
+    userCart.products.push(newCartProduct._id)
+    await userCart.save()
+  }
+
+
+  res.redirect('back')
+
+})
+
+router.post('/updateQuantity', isloggedIn, async (req, res, next) => {
+  await cartProductModel.findOneAndUpdate({ _id: req.body.cartProductId }, {
+    quantity: req.body.quantity
+  })
+  res.json({ message: "quantity updated" })
+})
+
+router.get('/remove/:cartProductId', isloggedIn, async (req, res, next) => {
+  await cartProductModel.findOneAndDelete({ _id: req.params.cartProductId })
+  res.redirect('back')
 })
 
 
