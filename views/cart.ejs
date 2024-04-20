@@ -3,6 +3,7 @@
 <main>
   <section class="p-4 px-6">
     <div class="items flex flex-col gap-10">
+<<<<<<< HEAD
       <% if(userCart.products.length == 0){ %>
         <h1 class="text-2xl text-center">No items in cart</h1>
         <% } %>
@@ -40,6 +41,38 @@
 <nav class="sticky bottom-[5rem] p-3 px-6 bg-slate-100 flex justify-between items-center    " style="border-bottom: 1px solid #aaa;">
   <h1 class="text-xl">
     <small>Total :</small> ₹<span id="total-price"><%=userCart.price%></span>
+=======
+      <% userCart.products.forEach(cartProduct=>{ %>
+      <div class="item flex flex-col gap-1">
+        <div class="top flex gap-3">
+          <div class="left w-20 flex-shrink-0 ">
+            <img class="h-20 w-20 rounded-md aspect-square object-cover" src="<%= cartProduct.product.image[0] %>" alt="">
+          </div>
+          <div class="right truncate">
+            <h1 class="truncate text-xl"><%= cartProduct.product.name %></h1>
+            <p class="truncate leading-none opacity-50"><%= cartProduct.product.description %></p>
+            <p class="text-light leading-loose mt-auto"> ₹<%= cartProduct.product.price %> </p>
+          </div>
+        </div>
+        <div class="bottom flex gap-3 justify-end">
+          <label for="quantity_1" class="flex gap-3 w-fit p-2 rounded-md border bg-slate-50">
+            qty :
+            <input style="width: 4ch;" type="Number" class="bg-transparent outline-none border-none" id="quantity_1" value="00<%= cartProduct.quantity %>" oninput="((event)=>{
+              updateQuantity('<%= cartProduct._id %>',event.target.value)
+            })(event)">
+          </label>
+          <a href="/remove/<%= cartProduct._id %>" class="w-fit p-2 rounded-md border bg-slate-50/75 border-red-100">remove</a>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+</main>
+
+<nav class="sticky bottom-[5rem] p-3 px-6 bg-slate-100 flex justify-between items-center    " style="border-bottom: 1px solid #aaa;">
+  <h1 class="text-xl">
+    <small>Total :</small> ₹<%= totalPrice %>
+>>>>>>> 082648b03969898fa3a2baa1828de1674c4fe79a
   </h1>
   <button onclick="window.location.href='/checkout'" class="p-2 px-4 text-lg bg-slate-200 rounded-md">place order</button>
 </nav>
@@ -48,15 +81,32 @@
   async function updateQuantity(cartProductId,quantity){
     if(quantity> 0){
 
+<<<<<<< HEAD
       const response = await axios.post('/updatedQuantity',{
+=======
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js" integrity="sha512-PJa3oQSLWRB7wHZ7GQ/g+qyv6r4mbuhmiDb8BjSFZ8NZ2a42oTtAq5n0ucWAwcQDlikAtkub+tPVCw4np27WCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  async function updateQuantity(cartProductId, quantity) {
+    if (quantity > 0) {
+      const response = await axios.post('/updateQuantity', {
+>>>>>>> 082648b03969898fa3a2baa1828de1674c4fe79a
         cartProductId,
         quantity
       })
       console.log(response.data)
+<<<<<<< HEAD
       document.getElementById('total-price').innerText = response.data.price;
     }else{
+=======
+    } else {
+>>>>>>> 082648b03969898fa3a2baa1828de1674c4fe79a
       console.log('quantity less than zero')
     }
   }
 </script>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 082648b03969898fa3a2baa1828de1674c4fe79a
 <% include ./partials/footer.ejs %>
