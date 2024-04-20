@@ -4,13 +4,14 @@ const userModel = require('./users')
 const productModel = require('./product')
 const cartModel = require('./cart')
 const cartProductModel = require('./cartProduct')
+const orderModel = require('./order.js')
 
 var users = require('./users')
 var passport = require('passport')
 var localStrategy = require('passport-local')
 passport.use(new localStrategy(users.authenticate()))
 const upload = require('./multer')
-
+ 
 /* GET home page. */
 router.get('/', isloggedIn, async function (req, res, next) {
 
@@ -59,6 +60,9 @@ function isSeller(req, res, next) {
 router.get('/login', function (req, res) {
   res.render('login', { title: 'Login' });
 })
+// router.get('/checkout', function (req, res) {
+//   res.render('checkout');
+// })
 
 
 router.post('/login',passport.authenticate('local',{
@@ -107,11 +111,20 @@ router.post('/createProduct', isloggedIn, isSeller, upload.array('image'), async
 
 })
 
-router.get('/cart', (req, res, next) => {
-  res.render('cart')
+router.get('/cart',isloggedIn, async (req, res, next) => {
+  const userCart = await cartModel.findOne({
+    user:req.user._id
+  }).populate('products').populate({
+    path:'products',
+    populate:'product'
+  })
+
+  res.render('cart',{userCart})
 })
 router.get('/addToCart/:productId',async (req, res, next) => {
  const productId = req.params.productId;
+ let product = await productModel.findById(productId)
+ if(!product) return res.status(404).send('product not found')
 
  let  userCart = await cartModel.findOne({
   user:req.user._id
@@ -122,6 +135,7 @@ router.get('/addToCart/:productId',async (req, res, next) => {
     user:req.user._id
   })
  }
+
  let newCartProduct = await cartProductModel.findOne({
   product:productId,  
   _id:{$in:userCart.products}
@@ -130,6 +144,8 @@ router.get('/addToCart/:productId',async (req, res, next) => {
 
 if(newCartProduct){
  newCartProduct.quantity = newCartProduct.quantity + 1
+ userCart.price=userCart.price + product.price,
+ 
  await newCartProduct.save()
 }
 else{
@@ -139,9 +155,11 @@ else{
 })
 
  userCart.products.push(newCartProduct._id)
- await userCart.save()
+ userCart.price=userCart.price + product.price
+
 }
 
+await userCart.save()
 
 res.redirect('back')
 
@@ -150,7 +168,54 @@ res.redirect('back')
 router.get('/profile', (req, res, next) => {
   res.render('profile')
 })
+router.post('/updatedQuantity',isloggedIn,async (req, res, next) => {
+  let userCart=await cartModel.findOne({
+    user:req.user._id
+  })
+  if(!userCart) return res.status(404).send('cart not found')
+  let product = await cartProductModel.findById(req.body.cartProductId).populate('product');
+  if(!product) return res.status(404).send('product not found')
+  userCart.price = userCart.price - (product.product.price*product.quantity) + (product.product.price * req.body.quantity )
 
+  await cartProductModel.findOneAndUpdate({_id:req.body.cartProductId},
+  {quantity:req.body.quantity}),
+  res.json({message:"quantity updated",price:userCart.price})
+})
+  router.get('/remove/:cartProductId',isloggedIn,async (req, res, next) => {
+    const userCart = await cartModel.findOne({
+      user:req.user._id
+    })
+    if(!userCart) return res.status(404).send('cart not found')
+    let product = await cartProductModel.findById(req.params.cartProductId).populate('product')
+    if(!product) return res.status(404).send('product not found')
+    userCart.products = user.products.filter(p=> p.toString() !== req.params.cartProductId);
+    await userCart.save();
 
+    await cartProductModel.findOneAndDelete({_id:req.params.cartProductId}),
+    res.redirect('back')
+  })
+router.get('/checkout',isloggedIn,async (req,res,next)=>{
+  const userCart = await cartModel.findOne({
+    user:req.user._id
+  }).populate('products').populate({
+    path:'products',
+    populate:'product'
+  })
+  if(!userCart) return res.status(404).send('cart not found');
+  let order = await orderModel.findOne({customer:req.user._id,status:'pending'}).populate('orderItems.product');
+  if(order) return res.render('checkout',{order});
+  let newOrder = await orderModel.create({
+    customer:req.user._id,
+    orderItems:userCart.products.map(product=>{
+      return{
+        product:product.product._id,
+        quantity:product.quantity
+      }
+    }),
+    price:userCart.price
+  })
+  await newOrder.populate('orderItems.product').execPopulate();
+  return res.render('checkout',{order:newOrder});
+}) 
 
 module.exports = router;

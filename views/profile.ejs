@@ -1,0 +1,20 @@
+<% include ./partials/header.ejs %>
+
+<main>
+  <section class="flex products grid p-2 pt-4">
+    <div class="product  w-100 rounded-md overflow-hidden">
+      <div class="images 100% flex overflow-x-auto" style="scroll-snap-type: x mandatory;">
+        <img style="scroll-snap-align: center;" class="w-100 aspect-3/4 object-contain" src="<%= imageSrc %>" alt="">
+      </div>
+      <div class="text p-2 truncate">
+        <h1>Deers</h1>
+        <p class="opacity-50 text-sm truncate">Lorem ipsum dolor sit amet consectetur adipisicing elit. Laudantium, temporibus?</p>
+      </div>
+      <div class="flex flex-col justify-between p-2 pt-0 gap-2">
+        <span class="text-lg font-thin">₹ 100000</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<% include ./partials/footer.ejs %>
